@@ -8,6 +8,7 @@ const generatePasswordHash = (password) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let hash = await bcrypt.hash(password, SALT_ROUNDS);
+			resolve(hash)
 		} catch(e) {
 			reject(e);
 		}

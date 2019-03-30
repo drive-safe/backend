@@ -2,7 +2,7 @@
 
 const jwt = require("jsonwebtoken");
 
-const EXPIRTY_TIME = 0;
+const EXPIRY_TIME = 0;
 
 const generateToken = (payload, expiryTime = EXPIRY_TIME) => {
 	return new Promise(async (resolve, reject) => {
