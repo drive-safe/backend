@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
 
+const locationSchema = {
+  type: {
+    type: String,
+    required: true,
+  },
+  coordinates: [Number],
+}
+
 const schema = {
   name : {
     type: String,
@@ -18,14 +26,8 @@ const schema = {
     required: true,
   },
   location: {
-    latitude : {
-      type: String,
-      required: false,
-    },
-    longitude : {
-      type: String,
-      required: false,
-    }
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'locationSchema',
   },
   status : {
     type: Number,
