@@ -116,7 +116,6 @@ const login = async (req, res) => {
     }
     
     let user;
-    console.log(req.body)
     if(req.body.client === parseInt(CLIENT['HERO'])) {
       user = await HeroModel.findOne({ email: req.body.email });  
     } else {
