@@ -41,10 +41,10 @@ const registerHero = async (req, res) => {
       status: 200,
       message: "Success, New hero created.",
       data: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        mobile: user.mobile
+        id: hero.id,
+        name: hero.name,
+        email: hero.email,
+        mobile: hero.mobile
       },
     });
   } catch (e) {
@@ -68,18 +68,15 @@ const registerDriver = async (req, res) => {
   } = req.body;
 
   try {
-    let hero = await DriverModel.findOne({ email: email });
-
-    if(hero){
+    let driver = await DriverModel.findOne({ email: email });
+    if(driver){
       return res.status(400).json({
         status: 400,
         message: "User already exists"
       });
     }
-
     let hashPassword = await hash.generatePasswordHash(password);
-
-    hero = await HeroModel.create({
+    driver = await DriverModel.create({
       name: name,
       email: email,
       password: hashPassword,
@@ -92,11 +89,11 @@ const registerDriver = async (req, res) => {
       status: 200,
       message: "Success, New hero created.",
       data: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        mobile: user.mobile,
-        gender: user.gender,
+        id: driver.id,
+        name: driver.name,
+        email: driver.email,
+        mobile: driver.mobile,
+        gender: driver.gender,
       },
     });
   } catch (e) {
@@ -119,7 +116,8 @@ const login = async (req, res) => {
     }
     
     let user;
-    if(req.body.client === CLIENT['HERO']) {
+    console.log(req.body)
+    if(req.body.client === parseInt(CLIENT['HERO'])) {
       user = await HeroModel.findOne({ email: req.body.email });  
     } else {
       user = await DriverModel.findOne({ email: req.body.email });  
@@ -172,8 +170,67 @@ const login = async (req, res) => {
   }
 }
 
+const updateHeroLocation = async (req, res) => {
+  let {
+    id,
+    latitude,
+    longitude
+  } = req.body;
+
+  let hero = await HeroModel.findOne({ id });
+
+  hero.location = [latitude, longitude];
+
+  hero.save(err => {
+    if(err){
+      return res.json({
+        status: 400,
+        message: "Something happened.",
+      });
+    }
+    return res.json({
+      status: 200,
+      message: "Success. Location updated",
+      data: {
+        id: hero.id,
+      },
+    });
+  });
+}
+
+const updateDriverLocation = async (req, res) => {
+  let {
+    id,
+    latitude,
+    longitude
+  } = req.body;
+
+  let driver = await DriverModel.findOne({ id });
+
+  driver.location = [latitude, longitude];
+
+  driver.save(err => {
+    if(err){
+      return res.json({
+        status: 400,
+        message: "Something happened.",
+      });
+    }
+    return res.json({
+      status: 200,
+      message: "Success. Location updated",
+      data: {
+        id: driver.id,
+      },
+    });
+  });
+}
+
+
 module.exports = {
   registerHero,
   registerDriver,
-  login
+  login,
+  updateHeroLocation,
+  updateDriverLocation,
 }
