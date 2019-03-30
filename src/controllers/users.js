@@ -13,14 +13,13 @@ const registerHero = async (req, res) => {
     name,
     email,
     mobile,
-    gender,
     password
   } = req.body;
 
   try {
     let hero = await HeroModel.findOne({ email: email });
 
-    if(hero){
+    if (hero) {
       return res.status(400).json({
         status: 400,
         message: "User already exists"
@@ -69,7 +68,7 @@ const registerDriver = async (req, res) => {
 
   try {
     let driver = await DriverModel.findOne({ email: email });
-    if(driver){
+    if (driver) {
       return res.status(400).json({
         status: 400,
         message: "User already exists"
@@ -114,18 +113,17 @@ const login = async (req, res) => {
         message: "Bad Request. Invalid request body.",
       });
     }
-    
     let user;
-    if(req.body.client === parseInt(CLIENT['HERO'])) {
-      user = await HeroModel.findOne({ email: req.body.email });  
+    if (parseInt(req.body.client) === CLIENT['HERO']) {
+      user = await HeroModel.findOne({ email: req.body.email });
     } else {
-      user = await DriverModel.findOne({ email: req.body.email });  
+      user = await DriverModel.findOne({ email: req.body.email });
     }
 
     if (!user) {
       return res.status(401).json({
         status: 401,
-        message : "Unauthorized. No account exist with that email.",
+        message: "Unauthorized. No account exist with that email.",
       });
     }
 
@@ -137,7 +135,7 @@ const login = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json({
         status: 401,
-        message : "Unauthorized. Invalid Password.",
+        message: "Unauthorized. Invalid Password.",
       });
     }
 
@@ -170,59 +168,129 @@ const login = async (req, res) => {
 }
 
 const updateHeroLocation = async (req, res) => {
-  let {
-    id,
-    latitude,
-    longitude
-  } = req.body;
+  try {
+    let {
+      id,
+      latitude,
+      longitude
+    } = req.body;
 
-  let hero = await HeroModel.findOne({ id });
+    let hero = await HeroModel.findOne({ id });
 
-  hero.location = [latitude, longitude];
+    hero.location = [latitude, longitude];
 
-  hero.save(err => {
-    if(err){
+    hero.save(err => {
+      if (err) {
+        return res.json({
+          status: 400,
+          message: "Something happened.",
+        });
+      }
       return res.json({
-        status: 400,
-        message: "Something happened.",
+        status: 200,
+        message: "Success. Location updated",
+        data: {
+          id: hero.id,
+          location: hero.location
+        },
       });
-    }
-    return res.json({
-      status: 200,
-      message: "Success. Location updated",
-      data: {
-        id: hero.id,
-      },
     });
-  });
+  } catch (e) {
+    console.poo(e);
+
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+    });
+  }
 }
 
 const updateDriverLocation = async (req, res) => {
-  let {
-    id,
-    latitude,
-    longitude
-  } = req.body;
+  try {
+    let {
+      id,
+      latitude,
+      longitude
+    } = req.body;
 
-  let driver = await DriverModel.findOne({ id });
+    let driver = await DriverModel.findOne({ id });
 
-  driver.location = [latitude, longitude];
+    driver.location = [latitude, longitude];
 
-  driver.save(err => {
-    if(err){
+    driver.save(err => {
+      if (err) {
+        return res.json({
+          status: 400,
+          message: "Something happened.",
+        });
+      }
       return res.json({
-        status: 400,
-        message: "Something happened.",
+        status: 200,
+        message: "Success. Location updated",
+        data: {
+          id: driver.id,
+          location: driver.location
+        },
+      });
+    });
+  } catch (e) {
+    console.poo(e);
+
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+    });
+  }
+}
+
+const getDriverLocation = (req, res) => {
+  try {
+    let id = req.params.driver;
+    let driver = DriverModel.findOne({ id });
+    if(!driver){
+      res.status(500).json({
+        status: 401,
+        message: "User not found",
       });
     }
-    return res.json({
+    let location = driver.location;
+    res.status(200).json({
       status: 200,
-      message: "Success. Location updated",
-      data: {
-        id: driver.id,
-      },
+      message: "Success",
+      dats: location
     });
-  });
+  } catch (e) {
+    console.poo(e)
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+    });
+  }
+}
+
+const getHeroLocation = (req, res) => {
+  try {
+    let id = req.params.hero;
+    let hero = HeroModel.findOne({ id });
+    if(!hero){
+      res.status(500).json({
+        status: 401,
+        message: "User not found",
+      });
+    }
+    let location = hero.location;
+    res.status(200).json({
+      status: 200,
+      message: "Success",
+      dats: location
+    });
+  } catch (e) {
+    console.poo(e)
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+    });
+  }
 }
 
 
@@ -232,4 +300,6 @@ module.exports = {
   login,
   updateHeroLocation,
   updateDriverLocation,
+  getDriverLocation,
+  getHeroLocation
 }
