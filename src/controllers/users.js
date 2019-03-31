@@ -229,6 +229,8 @@ const updateDriverLocation = async (req, res) => {
       latitude,
       longitude
     } = req.body;
+    latitude = parseFloat(latitude);
+    longitude = parseFloat(longitude);
 
     let driver = await DriverModel.findOne({ _id: id });
     driver.location = {
@@ -276,7 +278,7 @@ const getDriverLocation = (req, res) => {
     res.status(200).json({
       status: 200,
       message: "Success",
-      dats: location
+      dats: location.coordinates
     });
   } catch (e) {
     console.poo(e)
@@ -301,7 +303,7 @@ const getHeroLocation = (req, res) => {
     res.status(200).json({
       status: 200,
       message: "Success",
-      dats: location
+      dats: location.coordinates
     });
   } catch (e) {
     console.poo(e)
@@ -321,6 +323,9 @@ const getHelp = async (req, res) => {
       longitude
     } = req.body;
 
+    latitude = parseFloat(latitude);
+    longitude = parseFloat(longitude);
+    
     let driver = await DriverModel.findOne({ _id: id });
 
     driver.location = {
