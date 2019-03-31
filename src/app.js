@@ -6,11 +6,12 @@ const logger = require("morgan");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const chalk = require("chalk");
+const cookieParser = require("cookie-parser");
 
 
 const app = express();
 dotenv.config();
-
+app.use(cookieParser());
 const headers = require("./middlewares/headers");
 const auth = require("./middlewares/auth");
 const errorHandler = require("./middlewares/errorHandler");

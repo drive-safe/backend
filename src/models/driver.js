@@ -1,12 +1,6 @@
 const mongoose = require('mongoose');
 
-const locationSchema = {
-  type: {
-    type: String,
-    required: true,
-  },
-  coordinates: [Number],
-}
+
 
 const schema = {
   name : {
@@ -31,9 +25,9 @@ const schema = {
     required: true,
   },
   location: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'locationSchema',
-  },
+    type: { type: String },
+    coordinates: []
+   },
   status : {
     type: Number,
     required: true
@@ -53,4 +47,5 @@ const options = {
 };
 
 const driverSchema = new mongoose.Schema(schema, options);
+driverSchema.index({ location: "2dsphere" });
 module.exports = mongoose.model("Driver", driverSchema);

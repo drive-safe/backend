@@ -11,6 +11,9 @@ module.exports = async (req, res, next) => {
 	if (req.url === "/users/login" && req.method === "POST") return next();
 	if (req.url === "/users/hero/register" && req.method === "POST") return next();
 	if (req.url === "/users/driver/register" && req.method === "POST") return next(); 
+	if (req.url === "/users/hero/location" && req.method === "POST") return next(); 
+	if (req.url === "/users/driver/location" && req.method === "POST") return next(); 
+
 
 	let token;
 	const bearer = req.get("Authorization");

@@ -1,13 +1,5 @@
 const mongoose = require('mongoose');
 
-const locationSchema = {
-  type: {
-    type: String,
-    required: true,
-  },
-  coordinates: [Number],
-}
-
 const schema = {
   name : {
     type: String,
@@ -26,9 +18,10 @@ const schema = {
     required: true,
   },
   location: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'locationSchema',
-  },
+    required: false,
+    type: { type: String },
+    coordinates: [],
+   },
   status : {
     type: Number,
     required: true
@@ -48,4 +41,5 @@ const options = {
 };
 
 const heroSchema = new mongoose.Schema(schema, options);
+heroSchema.index({ location: "2dsphere" });
 module.exports = mongoose.model("Hero", heroSchema);

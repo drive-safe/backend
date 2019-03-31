@@ -2,6 +2,7 @@
 
 const DriverModel = require("../models/Driver");
 const HeroModel = require("../models/Hero");
+const caseModel = require("../models/case")
 const hash = require("../utils/hash");
 const jwt = require("../utils/jwt");
 
@@ -34,6 +35,10 @@ const registerHero = async (req, res) => {
       password: hashPassword,
       mobile: mobile,
       status: 0,
+      location: {
+        type: "Point",
+        coordinates: [0, 0]
+      },
     });
 
     return res.json({
@@ -81,7 +86,11 @@ const registerDriver = async (req, res) => {
       password: hashPassword,
       mobile: mobile,
       status: 0,
-      gender: gender
+      gender: gender,
+      location: {
+        type: "Point",
+        coordinates: [0, 0]
+      },
     });
 
     return res.json({
@@ -106,6 +115,7 @@ const registerDriver = async (req, res) => {
 };
 
 const login = async (req, res) => {
+  console.log(req.body)
   try {
     if (!req.body.email || !req.body.password) {
       return res.status(400).json({
@@ -146,7 +156,7 @@ const login = async (req, res) => {
       client: req.body.client,
     });
 
-    res.cookie("token", token).json({
+    res.cookie("token", token).send({
       status: 200,
       message: "Success. User successfully logged in.",
       data: {
@@ -168,6 +178,7 @@ const login = async (req, res) => {
 }
 
 const updateHeroLocation = async (req, res) => {
+  console.log("q")
   try {
     let {
       id,
@@ -175,9 +186,12 @@ const updateHeroLocation = async (req, res) => {
       longitude
     } = req.body;
 
-    let hero = await HeroModel.findOne({ id });
-
-    hero.location = [latitude, longitude];
+    console.log(req.body)
+    let hero = await HeroModel.findOne({ _id: id });
+    hero.location = {
+      type: "Point",
+      coordinates: [longitude, latitude]
+    }
 
     hero.save(err => {
       if (err) {
@@ -213,9 +227,11 @@ const updateDriverLocation = async (req, res) => {
       longitude
     } = req.body;
 
-    let driver = await DriverModel.findOne({ id });
-
-    driver.location = [latitude, longitude];
+    let driver = await DriverModel.findOne({ _id: id });
+    driver.location = {
+      type: "Point",
+      coordinates: [longitude, latitude]
+    }
 
     driver.save(err => {
       if (err) {
@@ -247,7 +263,7 @@ const getDriverLocation = (req, res) => {
   try {
     let id = req.params.driver;
     let driver = DriverModel.findOne({ id });
-    if(!driver){
+    if (!driver) {
       res.status(500).json({
         status: 401,
         message: "User not found",
@@ -272,7 +288,7 @@ const getHeroLocation = (req, res) => {
   try {
     let id = req.params.hero;
     let hero = HeroModel.findOne({ id });
-    if(!hero){
+    if (!hero) {
       res.status(500).json({
         status: 401,
         message: "User not found",
@@ -293,6 +309,71 @@ const getHeroLocation = (req, res) => {
   }
 }
 
+const getHelp = async (req, res) => {
+
+  try {
+    let {
+      id,
+      latitude,
+      longitude
+    } = req.body;
+
+    let driver = await DriverModel.findOne({ _id: id });
+
+    driver.location = {
+      type: "Point",
+      coordinates: [longitude, latitude]
+    }
+
+    driver.save(err => {
+      if (err) {
+        return res.json({
+          status: 400,
+          message: "Something happened.",
+        });
+      }
+    });
+
+    let hero = await HeroModel.findOne({
+      location: {
+        $near: {
+          $maxDistance: 3000,
+          $geometry: {
+            type: "Point",
+            coordinates: [longitude, latitude]
+          }
+        }
+      }
+    })
+
+     let Case = await CaseModel.create({
+      userId : id,
+      heroId : hero.id,
+      status: 0,
+      startTime : new Date,
+    });
+
+    return res.json({
+      status: 200,
+      message: "Success, New hero created.",
+      data: {
+        id: Case.id,
+        driverId: Case.userId,
+        heroId: Case.heroId,
+      },
+    });
+
+  } catch (e) {
+    console.poo(e);
+
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+    });
+  }
+
+}
+
 
 module.exports = {
   registerHero,
@@ -301,5 +382,6 @@ module.exports = {
   updateHeroLocation,
   updateDriverLocation,
   getDriverLocation,
-  getHeroLocation
+  getHeroLocation,
+  getHelp
 }
