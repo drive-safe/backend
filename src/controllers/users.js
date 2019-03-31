@@ -185,9 +185,12 @@ const updateHeroLocation = async (req, res) => {
       latitude,
       longitude
     } = req.body;
+    latitude = parseFloat(latitude);
+    longitude = parseFloat(longitude);
 
     console.log(req.body)
     let hero = await HeroModel.findOne({ _id: id });
+
     hero.location = {
       type: "Point",
       coordinates: [longitude, latitude]
