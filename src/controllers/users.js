@@ -2,7 +2,7 @@
 
 const DriverModel = require("../models/Driver");
 const HeroModel = require("../models/Hero");
-const caseModel = require("../models/case")
+const CaseModel = require("../models/case")
 const hash = require("../utils/hash");
 const jwt = require("../utils/jwt");
 
@@ -115,7 +115,7 @@ const registerDriver = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  console.log(req.body)
+
   try {
     if (!req.body.email || !req.body.password) {
       return res.status(400).json({
@@ -165,6 +165,7 @@ const login = async (req, res) => {
         email: user.email,
         mobile: user.mobile,
         token: token,
+        status: user.status,
       },
     });
   } catch (e) {
@@ -178,7 +179,6 @@ const login = async (req, res) => {
 }
 
 const updateHeroLocation = async (req, res) => {
-  console.log("q")
   try {
     let {
       id,
@@ -188,7 +188,6 @@ const updateHeroLocation = async (req, res) => {
     latitude = parseFloat(latitude);
     longitude = parseFloat(longitude);
 
-    console.log(req.body)
     let hero = await HeroModel.findOne({ _id: id });
 
     hero.location = {
@@ -325,27 +324,17 @@ const getHelp = async (req, res) => {
 
     latitude = parseFloat(latitude);
     longitude = parseFloat(longitude);
-    
-    let driver = await DriverModel.findOne({ _id: id });
 
+    let driver = await DriverModel.findOne({ _id: id });
     driver.location = {
       type: "Point",
       coordinates: [longitude, latitude]
     }
 
-    driver.save(err => {
-      if (err) {
-        return res.json({
-          status: 400,
-          message: "Something happened.",
-        });
-      }
-    });
 
     let hero = await HeroModel.findOne({
       location: {
         $near: {
-          $maxDistance: 3000,
           $geometry: {
             type: "Point",
             coordinates: [longitude, latitude]
@@ -354,6 +343,8 @@ const getHelp = async (req, res) => {
       }
     })
 
+    hero.status = 1;
+    
      let Case = await CaseModel.create({
       userId : id,
       heroId : hero.id,
@@ -361,9 +352,30 @@ const getHelp = async (req, res) => {
       startTime : new Date,
     });
 
+    driver.currentCase = Case.id;
+    hero.currentCase = Case.id;
+
+    await driver.save(err => {
+      if (err) {
+        return res.json({
+          status: 400,
+          message: "Something happened.",
+        });
+      }
+    });
+
+    await hero.save(err => {
+      if (err) {
+        return res.json({
+          status: 400,
+          message: "Something happened while changing hero state.",
+        });
+      }
+    });
+
     return res.json({
       status: 200,
-      message: "Success, New hero created.",
+      message: "Success.",
       data: {
         id: Case.id,
         driverId: Case.userId,
@@ -379,7 +391,45 @@ const getHelp = async (req, res) => {
       message: "Internal Server Error",
     });
   }
+}
 
+const getCaseLocation = async (req, res) => {
+  try {
+
+    let {
+      id
+    } = req.body;
+
+    let hero = await  HeroModel.findOne({
+      _id : id,
+    });
+
+    let Case = await CaseModel.findOne({
+      _id : hero.currentCase
+    })
+
+    let driver = await DriverModel.findOne({
+      id : Case.driverId
+    })
+
+    return res.json({
+      status: 200,
+      message: "Success.",
+      data: {
+        id: driver.id,
+        latitude: driver.location.coordinates[1],
+        longitude: driver.location.coordinates[0],
+      },
+    });
+
+  } catch(e){
+    console.poo(e);
+
+    res.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+    });
+  }
 }
 
 
@@ -391,5 +441,6 @@ module.exports = {
   updateDriverLocation,
   getDriverLocation,
   getHeroLocation,
-  getHelp
+  getHelp,
+  getCaseLocation
 }

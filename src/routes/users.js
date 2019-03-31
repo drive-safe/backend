@@ -12,5 +12,7 @@ router.post("/hero/location", Users.updateHeroLocation);
 router.post("/driver/location", Users.updateDriverLocation);
 router.get("/driver/location/:driver", Users.getDriverLocation);
 router.get("/hero/location/:hero", Users.getHeroLocation);
+router.post("/hero/driver/location", Users.getCaseLocation);
+router.post("/driver/help", Users.getHelp);
 
 module.exports = router;

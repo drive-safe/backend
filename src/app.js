@@ -29,7 +29,7 @@ app.use(logger(function (tokens, req, res) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(headers);
-app.use(auth);
+// app.use(auth);
 
 const usersRouter = require("./routes/users");
 

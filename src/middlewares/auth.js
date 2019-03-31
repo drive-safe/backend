@@ -6,13 +6,14 @@ const HeroModel = require("../models/Hero");
 const { HTTP_STATUS, CLIENT } = require("../utils/constants");
 
 module.exports = async (req, res, next) => {
-	console.log(req.url);
-	console.log(req.method);
+
 	if (req.url === "/users/login" && req.method === "POST") return next();
 	if (req.url === "/users/hero/register" && req.method === "POST") return next();
 	if (req.url === "/users/driver/register" && req.method === "POST") return next(); 
 	if (req.url === "/users/hero/location" && req.method === "POST") return next(); 
 	if (req.url === "/users/driver/location" && req.method === "POST") return next(); 
+	if (req.url === "/users/driver/help" && req.method === "POST") return next(); 
+
 
 
 	let token;
